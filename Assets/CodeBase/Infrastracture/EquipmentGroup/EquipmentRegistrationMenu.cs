@@ -9,7 +9,6 @@ namespace CodeBase.Infrastracture.EquipmentGroup
     {
         [SerializeField] private EquipmentResult _equipmentResult;
         //[SerializeField] private Button _buttonApply;
-        [SerializeField] private Button _buttonApplyResult;
         [SerializeField] private Button _backButton;
         [SerializeField] private EquipmentValidator _validator;
 
@@ -61,8 +60,9 @@ namespace CodeBase.Infrastracture.EquipmentGroup
             _validator.SwithState(false);
             OnApply?.Invoke();
             OnRegistrationEnd?.Invoke();
-            _equipmentResult.SwithState(true);
             _equipmentResult.SetData();
+            _equipmentResult.SwithState(true);
+            _equipmentResult.WhaiteToOpenBox();
         }
 
         public void SwitchValidatorState(bool state)
@@ -83,8 +83,8 @@ namespace CodeBase.Infrastracture.EquipmentGroup
         {
             _validator.OnTakeKey += OnApplyButtonClick;
    //         _buttonApply.onClick.AddListener(OnApplyButtonClick);
-            _buttonApplyResult.onClick.AddListener(OnResultButtonClick);
-            _backButton.onClick.AddListener(OnCLickBackButton);
+   _equipmentResult.ApplyEquipment += OnResultButtonClick;
+   _backButton.onClick.AddListener(OnCLickBackButton);
 
         }
 
@@ -92,7 +92,7 @@ namespace CodeBase.Infrastracture.EquipmentGroup
         {
             _validator.OnTakeKey -= OnApplyButtonClick;
      //       _buttonApply.onClick.RemoveListener(OnApplyButtonClick);
-            _buttonApplyResult.onClick.RemoveListener(OnResultButtonClick);
+     _equipmentResult.ApplyEquipment -= OnResultButtonClick;
             _backButton.onClick.RemoveListener(OnCLickBackButton);
         }
 

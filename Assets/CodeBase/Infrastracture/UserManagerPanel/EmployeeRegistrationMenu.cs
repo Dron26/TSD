@@ -54,6 +54,7 @@ namespace CodeBase.Infrastracture.UserManagerPanel
         {
             _CheckDownPass.enabled = false;
             _CheckUpPass.enabled = true;
+            _saveLoadService.SendCommandArduino("REGOK");
             OnLogged?.Invoke();
             Reset();
         }

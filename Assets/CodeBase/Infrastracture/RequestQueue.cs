@@ -7,7 +7,6 @@ using CodeBase.Infrastracture.Datas;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.UI;
 
 namespace CodeBase.Infrastracture
 {
@@ -25,7 +24,7 @@ namespace CodeBase.Infrastracture
         private const int MAX_QUEUE_SIZE_DATA_TROLLEY = 500;
         private const int MAX_QUEUE_SIZE_DATA = 500;
         private const int MAX_QUEUE_SIZE_TROLLEY = 500;
-        private const int MAX_QUEUE_SIZE_INFO= 500;
+        private const int MAX_QUEUE_SIZE_INFO = 500;
         private string _filePathOfflineData = "path_to_your_data_file.json";
         private string _filePathOfflineLog = "path_to_your_file.json";
         private string _filePathOfflineTrolley = "path_to_your_trolley_file.json";
@@ -46,18 +45,31 @@ namespace CodeBase.Infrastracture
         private bool _isSendingOldLogs = false;
         private bool _sentInfo = false;
         private bool _isSendWorkInfo = false;
-        private DateTime sentInfoTime  ;
+        private DateTime sentInfoTime;
         private string BASE_URL;
         private string LOG_URL;
         private string INFO_URL;
 
-        private string EquipmentBaseUrl ="https://docs.google.com/forms/u/0/d/e/1FAIpQLScENY48wHtzHZwrfs5EldSC3tZTcg0B-BNXBmfO31XXpziM4w/formResponse";
-        private string EquipmentLogUrl ="https://docs.google.com/forms/u/0/d/e/1FAIpQLSe3Cc86niLM2J0vhsw-4NQd8AnD4QcZLcCRehpgEAYPS1iibw/formResponse";
-        private string TrollyBaseUrl ="https://docs.google.com/forms/u/0/d/e/1FAIpQLSd6TEzgv5598bWKc0-wuXFtTNHdjqebwPf3t6EaZyNPeh6PyQ/formResponse";
-        private string Trolly_URL = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSc9S0Bpj6hXYWS_TKl4-IU2J8LBGdw6CjkXKBsaqtGcGZc7BQ/formResponse";
-        private string TrollyLogUrl ="https://docs.google.com/forms/u/0/d/e/1FAIpQLSfhCOEMphSxAcFgvpVLifdoxS70z4ziCtzBXwdXnG9yOSmuIg/formResponse";
-        private string EmployeeInfo ="https://docs.google.com/forms/u/0/d/e/1FAIpQLScTZU4YODklIzQxyic73w6eX5y-84tIMSk85GTv3h8cfJ-gNA/formResponse";
-        private string WorkEmployyeInfo = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSf88LQyeHSivW8odqE0Tl76uYDymwgh_bir3iWRcuukXFydkg/formResponse";
+        private string EquipmentBaseUrl =
+            "https://docs.google.com/forms/u/0/d/e/1FAIpQLScENY48wHtzHZwrfs5EldSC3tZTcg0B-BNXBmfO31XXpziM4w/formResponse";
+
+        private string EquipmentLogUrl =
+            "https://docs.google.com/forms/u/0/d/e/1FAIpQLSe3Cc86niLM2J0vhsw-4NQd8AnD4QcZLcCRehpgEAYPS1iibw/formResponse";
+
+        private string TrollyBaseUrl =
+            "https://docs.google.com/forms/u/0/d/e/1FAIpQLSd6TEzgv5598bWKc0-wuXFtTNHdjqebwPf3t6EaZyNPeh6PyQ/formResponse";
+
+        private string Trolly_URL =
+            "https://docs.google.com/forms/u/0/d/e/1FAIpQLSc9S0Bpj6hXYWS_TKl4-IU2J8LBGdw6CjkXKBsaqtGcGZc7BQ/formResponse";
+
+        private string TrollyLogUrl =
+            "https://docs.google.com/forms/u/0/d/e/1FAIpQLSfhCOEMphSxAcFgvpVLifdoxS70z4ziCtzBXwdXnG9yOSmuIg/formResponse";
+
+        private string EmployeeInfo =
+            "https://docs.google.com/forms/u/0/d/e/1FAIpQLScTZU4YODklIzQxyic73w6eX5y-84tIMSk85GTv3h8cfJ-gNA/formResponse";
+
+        private string WorkEmployyeInfo =
+            "https://docs.google.com/forms/u/0/d/e/1FAIpQLSf88LQyeHSivW8odqE0Tl76uYDymwgh_bir3iWRcuukXFydkg/formResponse";
 
         private void SetURL()
         {
@@ -113,15 +125,13 @@ namespace CodeBase.Infrastracture
             }
 
             StartCoroutine(CheckInternetConnection());
-            StartCoroutine(CheckAndSendDaily());
         }
-
 
         private IEnumerator CheckInternetConnection()
         {
             bool internetAvailable = InternetIsAvailable();
             OnInternetAvailable();
-            
+
             while (true)
             {
                 WaitForSeconds wait = new WaitForSeconds(120f);
@@ -140,58 +150,19 @@ namespace CodeBase.Infrastracture
             }
         }
 
-
         public void SendOverdueInfo()
         {
-            StopCoroutine(CheckAndSendDaily());
-            StartCoroutine(CheckAndSendDaily());
-        }
-        
-        private IEnumerator CheckAndSendDaily()
-        {
-            
-            yield return new WaitForSeconds(5);
-            
-            while (true)
-            {
-                if (_saveLoadService.GetIntruderStatus())
-                {
-                    //EnqueueInfo();
-                    DateTime now=DateTime.Now;
-                    DateTime send;
-                   
-                        send= _saveLoadService.GetSendIntruderTime();
-                    
-                    
-                        //send = new DateTime(now.Year, now.Month, now.Day, 9, 20, 0);
-                    
-
-                    DateTime morningTime = new DateTime(now.Year, now.Month, now.Day, send.Hour, send.Minute, send.Second);
-
-                    if (now > morningTime)
-                    {
-                        morningTime = morningTime.AddDays(1);
-                    }
-
-                    TimeSpan timeUntilMorning = morningTime - now;
-                    SentData data = new SentData(
-                        timeUntilMorning.TotalSeconds.ToString(),
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        ""
-                    );
-                    EnqueueLog(data);
-                    yield return new WaitForSeconds((float)timeUntilMorning.TotalSeconds);
-                    
-                    EnqueueInfo();
-
-                }
-                   
-                  yield return new WaitForSeconds(5);
-            }
+            SentData data = new SentData(
+                "Отправка нарушителей",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+            );
+            EnqueueLog(data);
+            EnqueueInfo();
         }
 
         private void OnInternetAvailable()
@@ -201,7 +172,6 @@ namespace CodeBase.Infrastracture
             StartCoroutine(ProcessDataQueue());
             StartCoroutine(ProcessLogQueue());
             StartCoroutine(ProcessTrolleyDataQueue());
-           // StartCoroutine(ProcessInfoQueue());
 
             _isSendingOldLogs = false;
         }
@@ -298,16 +268,16 @@ namespace CodeBase.Infrastracture
                 Debug.Log(e);
             }
         }
-        
+
         public void EnqueueInfo()
         {
             List<Employee> overdueEmployees = _saveLoadService.GetOverdueEmployees();
-            
+
             try
             {
-                if (InternetIsAvailable())
+                if (InternetIsAvailable() && overdueEmployees.Count != 0)
                 {
-                    StartCoroutine(PostInfo( overdueEmployees));
+                    StartCoroutine(PostInfo(overdueEmployees));
                 }
             }
             catch (Exception e)
@@ -338,12 +308,13 @@ namespace CodeBase.Infrastracture
                     {
                         Debug.Log(e);
                     }
+
                     yield return wait;
                 }
             }
 
             _isSendWorkInfo = false;
-            
+
             yield return null;
         }
 
@@ -582,20 +553,20 @@ namespace CodeBase.Infrastracture
             }
         }
 
-        private IEnumerator<RequestResult> PostInfo(List<Employee> employees   )
+        private IEnumerator<RequestResult> PostInfo(List<Employee> employees)
         {
-            string comment=GenerateComment(employees);
+            string comment = GenerateComment(employees);
             string time = GetCurrentTime();
 
             using (UnityWebRequest webRequest = UnityWebRequest.Post(INFO_URL, new WWWForm()))
             {
                 WWWForm form = new WWWForm();
-                
+
                 form.AddField("entry.802121026", "TSDSystem");
                 form.AddField("entry.103189397", "пост охраны (шкафы с ТСД)");
                 form.AddField("entry.44403492", "критичный");
                 form.AddField("entry.1284209398", "моей проблемы нет в списке");
-                
+
                 if (comment != null)
                 {
                     string newComment = $"Сформирован список нарушителей :  {time} :  {comment}";
@@ -618,13 +589,13 @@ namespace CodeBase.Infrastracture
                 yield return result;
             }
         }
-        
-        public IEnumerator<RequestResult> PostEmployyeInfo(Employee employee )
+
+        public IEnumerator<RequestResult> PostEmployyeInfo(Employee employee)
         {
             using (UnityWebRequest webRequest = UnityWebRequest.Post(WorkEmployyeInfo, new WWWForm()))
             {
                 WWWForm form = new WWWForm();
-                
+
                 form.AddField("entry.1512495341", employee.Login);
                 form.AddField("entry.965414521", employee.Box.Key);
                 form.AddField("entry.656222468", employee.Equipment.SerialNumber);
@@ -649,22 +620,22 @@ namespace CodeBase.Infrastracture
         }
 
         private string GenerateComment(List<Employee> employees)
+        {
+            string comment = "";
+
+            foreach (var employee in employees)
             {
-                string comment = "";
-        
-                foreach (var employee in employees)
-                {
-                    comment += $"Login: {employee.Login}, ";
-                    comment += $"Key: {employee.Box?.Key ?? "None"}, ";
-                    comment += $"Scanner: {employee.Equipment?.SerialNumber ?? "None"}, ";
-                    comment += $"Printer: {employee.Printer?.SerialNumber ?? "None"}\n";
-                    comment += $"Date: {employee.DateTakenEquipment?? "None"}\n";
-                }
-        
-                return comment;
+                comment += $"Login: {employee.Login}, ";
+                comment += $"Key: {employee.Box?.Key ?? "None"}, ";
+                comment += $"Scanner: {employee.Equipment?.SerialNumber ?? "None"}, ";
+                comment += $"Printer: {employee.Printer?.SerialNumber ?? "None"}\n";
+                comment += $"Date: {employee.DateTakenEquipment ?? "None"}\n";
             }
 
-        
+            return comment;
+        }
+
+
         private void SaveOfflineQueueToJSONData(List<SentData> offlineQueue, string filePath, bool isRemove)
         {
             try

@@ -12,6 +12,7 @@ namespace CodeBase.Infrastracture.Datas
     public class SaveLoadService : MonoBehaviour
     {
         [SerializeField] private Logger _logger;
+        [SerializeField] private ArduinoCommunication _arduinoCommunication;
         public Data Database => _database;
         public Employee Employee ;
         public Trolley SelectedTrolley=>_selectedTrolley;
@@ -24,6 +25,7 @@ namespace CodeBase.Infrastracture.Datas
         public Action OnSelectTrolley;
         public bool IsTrolleActive=>_isSelectetTrolley;
         public int MaxEmployeeHours { get; set; }
+        public event Action<bool> OnConsoleOpen;
 
         private Data _database;
         private SwithStatus _swithStatus;
@@ -42,6 +44,9 @@ namespace CodeBase.Infrastracture.Datas
         private List<Employee> _overdueEmployees;
         private List<Employee> _employees;
         private DateTime _sendIntruderTime;
+        
+        public  Action<ComData> OnSetComData;
+        public  Action<string> OnArduinoAnswer;
         public void Init()
         {
             _isLogged = true;
@@ -317,6 +322,25 @@ namespace CodeBase.Infrastracture.Datas
          public void SendOverdueInfo()
          {
              _logger.SendOverdueInfo();
+         }
+         
+         public void SetComData(ComData data)
+         {
+             OnSetComData?.Invoke(data);
+         }
+         public void ConsoleOpen(bool state)
+         {
+             OnConsoleOpen?.Invoke(state);
+         }
+         
+         public void SendCommandArduino(string command)
+         {
+             _arduinoCommunication.Send(command);
+         }
+
+         public void TakeMessage(string message)
+         {
+             OnArduinoAnswer?.Invoke(message);
          }
     }
 }

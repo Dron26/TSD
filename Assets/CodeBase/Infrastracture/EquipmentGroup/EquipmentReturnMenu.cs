@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using CodeBase.Infrastracture.Datas;
 using TMPro;
@@ -38,6 +39,12 @@ namespace CodeBase.Infrastracture.EquipmentGroup
         private bool _isSerialNumberInputed;
         private bool _isSerialNumberPrinterInputed;
         private bool _mustReturnPrinter;
+        
+        
+        private Data _data;
+        private bool  _isOpenBox=false;
+        private bool _isActive;
+        
         public void Init(SaveLoadService saveLoadService, WarningPanel warningPanel)
         {
             _saveLoadService = saveLoadService;
@@ -48,6 +55,7 @@ namespace CodeBase.Infrastracture.EquipmentGroup
         public void Work()
         {
             _employee = _saveLoadService.Employee;
+            _isActive = true;
             _inputReturnField.Select();
             _inputReturnField.ActivateInputField();
             _inputReturnField.interactable = true;
@@ -58,6 +66,7 @@ namespace CodeBase.Infrastracture.EquipmentGroup
             _equipmentPanel.SetActive(true);
             _printerPanel.SetActive(false);
             _demoPrinter.SetActive(false);
+            _saveLoadService.OnArduinoAnswer+=ArduinoListen;
         }
         private void OnApplyButtonClick()
         {
@@ -107,6 +116,7 @@ namespace CodeBase.Infrastracture.EquipmentGroup
             _equipmentPanel.SetActive(true);
             _printerPanel.SetActive(false);
             _demoPrinter.SetActive(false);
+            _saveLoadService.OnArduinoAnswer-=ArduinoListen;
             _isReseted = false;
         }
 
@@ -133,7 +143,48 @@ namespace CodeBase.Infrastracture.EquipmentGroup
                 CheckInputPrinter();
             }
         }
+        private IEnumerator Whait()
+        {
+            Debug.Log("Whait");
+            
+            _saveLoadService.SendCommandArduino("OPEN"+_employee.Box.Key);
 
+            while (!_isOpenBox)
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    _isOpenBox = true;
+                }
+                yield return null;
+            }
+            Debug.Log("Opened1zzzz");
+
+
+            OnApplyButtonClick();
+        }
+        private void ArduinoListen(string message)
+        {
+            if (_isActive)
+            {
+                string messag = message[..6];
+                Debug.Log(message);
+            
+                if (messag == "Closed" )
+                {
+                    Debug.Log("ArduinoListen");
+                    Debug.Log(message);
+
+                    string key = _employee.Box.Key;
+                
+                    if (message == "Closed"+key)
+                    {
+                        _isOpenBox = true;
+                        Debug.Log(message);
+                    }
+                }
+
+            }
+        }
 
         private void ShowReturnPrinterPanel()
         {
@@ -172,12 +223,15 @@ namespace CodeBase.Infrastracture.EquipmentGroup
 
                 _isSerialNumberPrinterInputed = true;
                 _inputReturnPrinterField.interactable = false;
-                _buttonApply.interactable = true;
                 _CheckDownPrinter.enabled = false;
                 _CheckUpPrinter.enabled = true;
+                WhaiteToOpenBox();
             }
         }
-
+        public void WhaiteToOpenBox()
+        {
+            StartCoroutine(Whait());
+        }
         private void CheckInput()
         {
             string text = _inputReturnField.text;
@@ -204,12 +258,12 @@ namespace CodeBase.Infrastracture.EquipmentGroup
                     _buttonApply.interactable = true;
                     _CheckDown.enabled = false;
                     _CheckUp.enabled = true;
+                    WhaiteToOpenBox();
                 }
                 else
                 {
                     ShowReturnPrinterPanel();
                 }
-                
             }
 
             if (_isSerialNumberInputed == false)
@@ -241,7 +295,9 @@ namespace CodeBase.Infrastracture.EquipmentGroup
             }
             else
             {
+                StopCoroutine(Whait());
                 Reset();
+                
             }
 
             _panel.SetActive(state);
@@ -249,23 +305,24 @@ namespace CodeBase.Infrastracture.EquipmentGroup
 
         private void AddListeners()
         {
-            _buttonApply.onClick.AddListener(OnApplyButtonClick);
+           // _buttonApply.onClick.AddListener(OnApplyButtonClick);
             _inputReturnField.onValueChanged.AddListener(delegate { ValidateReturn(); });
             _inputReturnPrinterField.onValueChanged.AddListener(delegate { ValidateReturnPrinter(); });
             _resetInput.onClick.AddListener(ResetInput);
             _backButton.onClick.AddListener(OnCLickBackButton);
+            
         }
 
         private void RemuveListeners()
         {
             _inputReturnField.onValueChanged.RemoveListener(delegate { ValidateReturn(); });
             _inputReturnPrinterField.onValueChanged.RemoveListener(delegate { ValidateReturnPrinter(); });
-            _buttonApply.onClick.RemoveListener(OnApplyButtonClick);
+           // _buttonApply.onClick.RemoveListener(OnApplyButtonClick);
             _resetInput.onClick.RemoveListener(ResetInput);
             _backButton.onClick.RemoveListener(OnCLickBackButton);
+            _saveLoadService.OnArduinoAnswer-=ArduinoListen;
         }
-
-
+        
         private void SentLogMessage(string message, string comment)
         {
             _saveLoadService.SentLogInfo(message, comment);

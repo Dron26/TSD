@@ -381,6 +381,7 @@ namespace CodeBase.Infrastracture.AdditionalPanels
             _equipmentPanel.SetActive(false);
 
             Equipment equipment = new Equipment(_inputEquipmentField.text);
+            
             Box box = new Box(_inputBoxField.text, equipment);
 
             _saveLoadService.SetBox(box);

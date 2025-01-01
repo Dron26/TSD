@@ -45,6 +45,11 @@ namespace CodeBase.Infrastracture.AdditionalPanels
         [SerializeField] private Button _setSendHours;
         [SerializeField] private Toggle _sendIntruderStatus;
         
+        [SerializeField] private Button _consolePanelButtonOpen;
+        [SerializeField] private Button _consolePanelButtonClose;
+        [SerializeField] private GameObject _consolePanelObj;
+        [SerializeField] private ConsolePanel _consolePanel;
+        
         public Action<List<Employee>, List<Box>, List<Trolley>> Loaded;
         public Action OnBackButtonCLick;
         public bool isLoadedEmployees = false;
@@ -73,6 +78,7 @@ namespace CodeBase.Infrastracture.AdditionalPanels
             _warningPanel = warningPanel;
             _saveLoadService = saveLoadService;
             AddListeners();
+            _consolePanel.Init(_saveLoadService);
             _isCheck = true;
         }
         private void OnCLickSwithPlatform()
@@ -353,6 +359,8 @@ namespace CodeBase.Infrastracture.AdditionalPanels
             _googleSheetLoader.SucsessLoadedCertificate += OnSucsessLoadedCertificate;
             _loggedStatus.onValueChanged.AddListener(SetLoggedStatus);
             _sendIntruderStatus.onValueChanged.AddListener(SetIntruderStatus);
+            _consolePanelButtonOpen.onClick.AddListener(OpenConsolePanel);
+            _consolePanelButtonClose.onClick.AddListener(CloseConsolePanel);
         }
 
         private void SetWorkHours()
@@ -425,6 +433,20 @@ namespace CodeBase.Infrastracture.AdditionalPanels
             _googleSheetLoader.SucsessLoadedCertificate -= OnSucsessLoadedCertificate;
             _loggedStatus.onValueChanged.RemoveListener(SetLoggedStatus);
              _sendIntruderStatus.onValueChanged.RemoveListener(SetIntruderStatus);
+             _consolePanelButtonOpen.onClick.RemoveListener(OpenConsolePanel);
+             _consolePanelButtonClose.onClick.RemoveListener(CloseConsolePanel);
+        }
+
+        private void OpenConsolePanel()
+        {
+            _consolePanelObj.SetActive(true);
+           _saveLoadService.ConsoleOpen(true);
+        }
+        
+        private void CloseConsolePanel()
+        {
+            _consolePanelObj.SetActive(false);
+            _saveLoadService.ConsoleOpen(false);
         }
 
         private void SentLogMessage(string message)

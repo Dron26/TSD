@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using CodeBase.Infrastracture.Datas;
@@ -188,7 +189,7 @@ namespace CodeBase.Infrastracture.EquipmentGroup
                     _saveLoadService.SetCurrentEmployee(_employee);
                     _saveLoadService.SaveDatabase();
                     _buttonApply.interactable = false;
-
+                    
                     OnTakeKey?.Invoke();
                    
                     break;

@@ -34,7 +34,7 @@ namespace CodeBase.Infrastracture
         [SerializeField] private ChekerEuipment _chekerEuipment;
         [SerializeField] private OverdueEquipmentChecker _checker;
         [SerializeField] private Canvas _canvas;
-        
+        [SerializeField] private ArduinoCommunication _arduinoCom;
         
         public Action OnButtonClick;
         public Action OnInfoSenterClick;
@@ -82,6 +82,7 @@ namespace CodeBase.Infrastracture
             AddListeners();
             SentLogMessage("Программа инизиализированна");
             _adminPanel.CheckBuyed();
+            _arduinoCom.Init(_saveLoadService);
         }
 
         public void Work()
@@ -113,6 +114,7 @@ namespace CodeBase.Infrastracture
         private void Reset()
         {
             SentLogMessage("Программа Сброшена");
+            _saveLoadService.SendCommandArduino("REGNOK");
             _isLoggedManager = false;
             _isLoggedAdmin = false;
             _isLoggedEmployee = false;
